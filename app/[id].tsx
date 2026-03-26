@@ -1,17 +1,12 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import {
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function EditTeacher() {
   const params = useLocalSearchParams();
   const router = useRouter();
-
+  
+  const [num, setNum] = useState('');
   const [nom, setNom] = useState('');
   const [volHoraire, setVolHoraire] = useState('');
   const [taux, setTaux] = useState('');
@@ -19,6 +14,7 @@ export default function EditTeacher() {
   // ✅ Pré-remplissage (UNE seule fois)
   useEffect(() => {
     if (params.nom) {
+      setNum(params.num as string);
       setNom(params.nom as string);
       setVolHoraire((params.volHoraire as string) || '');
       setTaux((params.taux as string) || '');
@@ -26,21 +22,33 @@ export default function EditTeacher() {
   }, []);
 
   // ✅ Calcul salaire en live
-  const salaire =
-    (parseFloat(volHoraire) || 0) *
-    (parseFloat(taux) || 0);
+  
 
-  const handleSave = () => {
-    console.log('Modification:', {
-      id: params.id,
-      nom,
-      volHoraire,
-      taux,
-      salaire,
+  const handleSave = async () => {
+  try {
+    const res = await fetch(`http://localhost:3000/enseignants/modifier/${params.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        num: num,
+        nom: nom,
+        vol_horaire: parseInt(volHoraire),
+        taux: parseInt(taux)
+      })
     });
 
+    const data = await res.json();
+
+    console.log("Réponse update:", data);
+
     router.replace('/pages/teacherCRUD');
-  };
+
+  } catch (error) {
+    console.log(error);
+  }
+};
 
   return (
     <View style={styles.container}>
@@ -49,6 +57,13 @@ export default function EditTeacher() {
       {/* ✅ ID */}
       <Text style={styles.id}>ID: {params.id}</Text>
 
+      <TextInput
+        placeholder="matricule"
+        value={num}
+        onChangeText={setNum}
+        style={styles.input}
+        placeholderTextColor="#999"
+      />
       {/* NOM */}
       <TextInput
         placeholder="Nom"
@@ -78,10 +93,6 @@ export default function EditTeacher() {
         placeholderTextColor="#999"
       />
 
-      {/* ✅ SALAIRE LIVE */}
-      <Text style={styles.salary}>
-        Salaire: {salaire} Ar
-      </Text>
 
       {/* ✅ BOUTON PRO */}
       <Pressable style={styles.button} onPress={handleSave}>

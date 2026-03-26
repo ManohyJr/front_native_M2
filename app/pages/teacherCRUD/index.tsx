@@ -1,26 +1,78 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
+type Teacher = {
+  id: string;
+  num : string;
+  nom: string;
+  volHoraire: number;
+  taux: number;
+  salaire: number;
+};
 
 export default function TeacherCRUD() {
   const router = useRouter();
+ const [teachers, setTeachers] = useState<Teacher[]>([]);
+  const [stats, setStats] = useState({total: 0,max: 0,min: 0});
+  useEffect(() => {
+    fetchTeachers();
+    fetchStats();
+  }, []);
 
-  const [teachers, setTeachers] = useState([
-    { id: '1', nom: 'Rabe', volHoraire: 10, taux: 15, salaire: 150 },
-    { id: '2', nom: 'Ando', volHoraire: 12, taux: 20, salaire: 240 },
-  ]);
+  const fetchTeachers = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/enseignants/listes"); // Android emulator
+    const data = await res.json();
 
-  const deleteTeacher = (id: string) => {
-    setTeachers(teachers.filter(t => t.id !== id));
-  };
+    // adapter les noms (backend → frontend)
+    const formatted = data.map((item:any) => ({
+      id: item.id.toString(),
+      num: item.num,
+      nom: item.nom,
+      volHoraire: item.vol_horaire,
+      taux: item.taux,
+      salaire: item.salaire
+    }));
+
+    setTeachers(formatted);
+  } catch (error) {
+    console.log("Erreur fetch:", error);
+  }
+};
 
   // 🔥 STATISTIQUES
-  const salaires = teachers.map(t => t.salaire);
+  
+const fetchStats = async () => {
+  try {
+    const res = await fetch("http://localhost:3000/enseignants/stats/salaires");
+    const data = await res.json();
+    setStats({
+      total: data.salaire_total,
+      max: data.salaire_max,
+      min: data.salaire_min
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
-  const totalSalaire = salaires.reduce((sum, s) => sum + s, 0);
-  const maxSalaire = salaires.length ? Math.max(...salaires) : 0;
-  const minSalaire = salaires.length ? Math.min(...salaires) : 0;
+ const deleteTeacher = async (id: string) => {
+  // confirmation simple pour web
+  if (!window.confirm("Voulez-vous supprimer cet enseignant ?")) return;
+
+  try {
+    await fetch(`http://localhost:3000/enseignants/supprimer/${id}`, {
+      method: "DELETE",
+    });
+
+    fetchTeachers();
+    fetchStats();
+  } catch (error) {
+    console.log(error);
+  }
+};
+  
 
   return (
     <View style={styles.container}>
@@ -31,21 +83,21 @@ export default function TeacherCRUD() {
         <View style={styles.statCard}>
           <Text style={styles.statTitle}>Total</Text>
           <Text style={[styles.statValue, { color: '#2196F3' }]}>
-            {totalSalaire} Ar
+            {stats.total} Ar
           </Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={styles.statTitle}>Max</Text>
           <Text style={[styles.statValue, { color: '#4CAF50' }]}>
-            {maxSalaire} Ar
+            {stats.max} Ar
           </Text>
         </View>
 
         <View style={styles.statCard}>
           <Text style={styles.statTitle}>Min</Text>
           <Text style={[styles.statValue, { color: '#f44336' }]}>
-            {minSalaire} Ar
+            {stats.min} Ar
           </Text>
         </View>
       </View>
@@ -62,7 +114,7 @@ export default function TeacherCRUD() {
         style={styles.addButton}
         onPress={() =>
         router.push(
-        `/pages/camembert?total=${totalSalaire}&max=${maxSalaire}&min=${minSalaire}`
+        `/pages/camembert?total=${stats.total}&max=${stats.max}&min=${stats.min}`
         )
         }
         > 
@@ -77,6 +129,11 @@ export default function TeacherCRUD() {
         renderItem={({ item }) => (
           <View style={styles.card}>
             <Text style={styles.name}>{item.nom}</Text>
+            
+            <View style={styles.infoRow}>
+              <Text style={styles.label}>matricule :</Text>
+              <Text style={styles.value}>{item.num}</Text>
+            </View>
 
             <View style={styles.infoRow}>
               <Text style={styles.label}>Volume :</Text>
@@ -98,7 +155,7 @@ export default function TeacherCRUD() {
                 style={styles.editBtn}
                 onPress={() =>
                   router.push(
-                    `../../${item.id}?nom=${item.nom}&volHoraire=${item.volHoraire}&taux=${item.taux}`
+                    `../../${item.id}?num=${item.num}&nom=${item.nom}&volHoraire=${item.volHoraire}&taux=${item.taux}`
                   )
                 }
               >

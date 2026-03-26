@@ -8,20 +8,42 @@ export default function AddTeacher() {
   const [nom, setNom] = useState('');
   const [volHoraire, setVolHoraire] = useState('');
   const [taux, setTaux] = useState('');
+  const [matricule, setMatricule]= useState('');
+  
 
-  const handleAdd = () => {
-    if (!nom || !volHoraire || !taux) {
-      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
-      return;
-    }
+ const handleAdd = async () => {
+  if (!nom || !volHoraire || !taux || !matricule) {
+    Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+    return;
+  }
 
-    const salaire = parseFloat(volHoraire) * parseFloat(taux);
+  try {
+    const res = await fetch("http://localhost:3000/enseignants/inserer", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        num: matricule, // ⚠️ correspond au backend
+        nom: nom,
+        vol_horaire: parseInt(volHoraire),
+        taux: parseInt(taux)
+      })
+    });
 
-    console.log('Nouvel enseignant:', { nom, volHoraire, taux, salaire });
+    const data = await res.json();
 
-    router.replace('/pages/teacherCRUD'); // 🔥 mieux que push
-  };
+    console.log("Réponse backend:", data);
 
+    Alert.alert("Succès", "Enseignant ajouté");
+
+    router.replace('./pages/teacherCRUD');
+
+  } catch (error) {
+    console.log(error);
+    Alert.alert("Erreur", "Impossible d'ajouter");
+  }
+};
     const handleBack = () => {
     router.push('./pages/teacherCRUD');
     return;
@@ -31,7 +53,14 @@ export default function AddTeacher() {
     <View style={styles.container}>
       <Text style={styles.title}>➕ Ajouter un enseignant</Text>
       
-      
+      <TextInput
+        placeholder="matricule"
+        value={matricule}
+        onChangeText={setMatricule}
+        style={styles.input}
+        placeholderTextColor="#999"
+      />
+
       <TextInput
         placeholder="Nom"
         value={nom}
