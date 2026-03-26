@@ -76,6 +76,38 @@ const fetchStats = async () => {
 };
   
 
+
+// const deleteTeacher = (id: string) => {
+//   Alert.alert(
+//     "Confirmation",
+//     "Voulez-vous supprimer cet enseignant ?",
+//     [
+//       {
+//         text: "Annuler",
+//         style: "cancel"
+//       },
+//       {
+//         text: "Supprimer",
+//         style: "destructive",
+//         onPress: async () => {
+//           try {
+//             await fetch (`${BASE_URL}/enseignants/${id}`,{
+//               method: "DELETE"
+//             });
+
+//             // 🔁 recharger données
+//             fetchTeachers();
+//             fetchStats();
+
+//           } catch (error) {
+//             console.log(error);
+//           }
+//         }
+//       }
+//     ]
+//   );
+// };
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}> LISTES DES ENSEIGNANTS</Text>
