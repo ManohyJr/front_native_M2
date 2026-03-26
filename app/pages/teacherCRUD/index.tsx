@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useEffect, useState } from 'react';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
 type Teacher = {
   id: string;
@@ -12,9 +12,11 @@ type Teacher = {
 };
 
 export default function TeacherCRUD() {
-  const router = useRouter();
- const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [stats, setStats] = useState({total: 0,max: 0,min: 0});
+
+const BASE_URL = "http://192.168.2.146:3000";
+const router = useRouter();
+const [teachers, setTeachers] = useState<Teacher[]>([]);
+const [stats, setStats] = useState({total: 0,max: 0,min: 0});
   useEffect(() => {
     fetchTeachers();
     fetchStats();
@@ -22,7 +24,7 @@ export default function TeacherCRUD() {
 
   const fetchTeachers = async () => {
   try {
-    const res = await fetch("http://localhost:3000/enseignants/listes"); // Android emulator
+    const res = await fetch(`${BASE_URL}/enseignants/listes`); // Android emulator
     const data = await res.json();
 
     // adapter les noms (backend → frontend)
@@ -45,7 +47,7 @@ export default function TeacherCRUD() {
   
 const fetchStats = async () => {
   try {
-    const res = await fetch("http://localhost:3000/enseignants/stats/salaires");
+    const res = await fetch(`${BASE_URL}/enseignants/stats/salaires`);
     const data = await res.json();
     setStats({
       total: data.salaire_total,
@@ -62,7 +64,7 @@ const fetchStats = async () => {
   if (!window.confirm("Voulez-vous supprimer cet enseignant ?")) return;
 
   try {
-    await fetch(`http://localhost:3000/enseignants/supprimer/${id}`, {
+    await fetch(`${BASE_URL}/enseignants/supprimer/${id}`, {
       method: "DELETE",
     });
 

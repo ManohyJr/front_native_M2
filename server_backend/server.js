@@ -10,6 +10,6 @@ const enseignantRoutes = require("./routes/enseignants.routes");
 
 app.use("/enseignants", enseignantRoutes);
 
-app.listen(3000, () => {
+app.listen(3000, '0.0.0.0',() => {
   console.log("Serveur lancé sur http://localhost:3000");
 });

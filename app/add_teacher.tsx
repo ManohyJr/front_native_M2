@@ -4,7 +4,7 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 
 export default function AddTeacher() {
   const router = useRouter();
-
+  const BASE_URL = "http://192.168.2.146:3000";
   const [nom, setNom] = useState('');
   const [volHoraire, setVolHoraire] = useState('');
   const [taux, setTaux] = useState('');
@@ -18,7 +18,7 @@ export default function AddTeacher() {
   }
 
   try {
-    const res = await fetch("http://localhost:3000/enseignants/inserer", {
+    const res = await fetch(`${BASE_URL}/enseignants/inserer`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 export default function EditTeacher() {
   const params = useLocalSearchParams();
   const router = useRouter();
-  
+  const BASE_URL = "http://192.168.2.146:3000";
   const [num, setNum] = useState('');
   const [nom, setNom] = useState('');
   const [volHoraire, setVolHoraire] = useState('');
@@ -26,7 +26,7 @@ export default function EditTeacher() {
 
   const handleSave = async () => {
   try {
-    const res = await fetch(`http://localhost:3000/enseignants/modifier/${params.id}`, {
+    const res = await fetch(`${BASE_URL}/enseignants/modifier/${params.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json"
